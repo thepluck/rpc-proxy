@@ -1,0 +1,2 @@
+secrets/*
+!secrets/alchemy-api-keys.example.json

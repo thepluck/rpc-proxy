@@ -1,0 +1,22 @@
+services:
+  erpc:
+    image: ghcr.io/erpc/erpc:0.4.0
+    restart: unless-stopped
+    command: ["/erpc-server", "--config", "/erpc.ts"]
+    volumes:
+      - ./erpc.ts:/erpc.ts:ro
+    secrets:
+      # Mounted next to /erpc.ts so its relative import resolves.
+      - source: alchemy_api_keys
+        target: /secrets/alchemy-api-keys.json
+    environment:
+      LOG_WRITER: console
+      GOMEMLIMIT: 1800MiB
+    ports:
+      # Bound to localhost so other machines on the network cannot spend your Alchemy credits.
+      - "127.0.0.1:4000:4000"
+      - "127.0.0.1:4001:4001"
+
+secrets:
+  alchemy_api_keys:
+    file: ./secrets/alchemy-api-keys.json
