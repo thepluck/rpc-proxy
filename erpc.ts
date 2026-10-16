@@ -22,6 +22,7 @@ const networkAliases: Record<number, string> = {
   4326: "megaeth",
   4663: "robinhood",
   5042: "arc",
+  5000: "mantle",
 };
 
 const cachePolicy = (finality: string, ttl: string) => ({

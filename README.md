@@ -42,7 +42,7 @@ curl -X POST http://localhost:4000/main/ethereum \
   | 8453 | `base` | 4326 | `megaeth` |
   | 59144 | `linea` | 4663 | `robinhood` |
   | 146 | `sonic` | 5042 | `arc` |
-  | 80094 | `berachain` | | |
+  | 80094 | `berachain` | 5000 | `mantle` |
 
 - Any other chain in eRPC's Alchemy chain map: `http://localhost:4000/main/evm/<chainId>`.
 - Robinhood Chain and Arc are missing from eRPC's Alchemy chain map, so `providers/alchemy.ts` adds
