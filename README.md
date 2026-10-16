@@ -45,9 +45,11 @@ curl -X POST http://localhost:4000/main/ethereum \
   | 80094 | `berachain` | | |
 
 - Any other chain in eRPC's Alchemy chain map: `http://localhost:4000/main/evm/<chainId>`.
-- Etherlink, Robinhood Chain and Arc are missing from eRPC's Alchemy chain map, so
-  `providers/alchemy.ts` adds them as explicit Alchemy upstreams (`directChains`). Add a chain there
-  if eRPC answers `network 'evm:<id>' is not supported` for a chain Alchemy serves.
+- Robinhood Chain and Arc are missing from eRPC's Alchemy chain map, so `providers/alchemy.ts` adds
+  them as explicit Alchemy upstreams (`directChains`). Add a chain there if eRPC answers
+  `network 'evm:<id>' is not supported` for a chain Alchemy serves.
+- Alchemy does not serve Etherlink. It goes through Etherlink's official public RPC, set in
+  `providers/public.ts`, which is keyless and rate limited.
 - Prometheus metrics: `http://localhost:4001/metrics`.
 - Logs: `docker compose logs -f erpc`.
 
@@ -69,6 +71,7 @@ Both ports are bound to `127.0.0.1` only.
 | `erpc.ts` | eRPC config: server, memory cache, retries, chain aliases |
 | `providers/index.ts` | Collects the providers and upstreams of every source |
 | `providers/alchemy.ts` | One Alchemy provider per key, plus explicit upstreams for unmapped chains |
+| `providers/public.ts` | Keyless public endpoints for chains no keyed provider serves (Etherlink) |
 | `providers/keys.ts` | Validates a keys file |
 | `docker-compose.yml` | Runs the pinned image and mounts the config and keys files |
 | `secrets/alchemy-api-keys.json` | Your keys (private, gitignored) |

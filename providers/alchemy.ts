@@ -8,7 +8,6 @@ const apiKeys = parseApiKeys(alchemyApiKeysFile, "secrets/alchemy-api-keys.json"
 // Chains Alchemy serves that are missing from eRPC's Alchemy chain map, keyed by chain ID with the
 // Alchemy subdomain as value. The providers ignore them and they are added as explicit upstreams.
 const directChains: Record<number, string> = {
-  42793: "etherlink-mainnet",
   4663: "robinhood-mainnet",
   5042: "arc-mainnet",
 };
