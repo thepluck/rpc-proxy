@@ -50,6 +50,12 @@ curl -X POST http://localhost:4000/main/ethereum \
   `network 'evm:<id>' is not supported` for a chain Alchemy serves.
 - Alchemy does not serve Etherlink. It goes through Etherlink's official public RPC, set in
   `providers/public.ts`, which is keyless and rate limited.
+- Every chain has one or two keyless public RPCs tagged `tier:fallback` in `providers/public.ts`.
+  The selection policy in `erpc.ts` lists them after the primary upstreams, so a request that fails
+  on every Alchemy key is retried on a public RPC. Primaries that keep failing are excluded at the
+  next policy evaluation (every 5 s), and they are re-admitted once probes succeed. Until the first
+  evaluation, about 5 s after startup, requests can go to a fallback. The `X-Erpc-Upstream`
+  response header names the upstream that served a request.
 - Prometheus metrics: `http://localhost:4001/metrics`.
 - Logs: `docker compose logs -f erpc`.
 
@@ -68,10 +74,10 @@ Both ports are bound to `127.0.0.1` only.
 
 | File | Purpose |
 | --- | --- |
-| `erpc.ts` | eRPC config: server, memory cache, retries, chain aliases |
+| `erpc.ts` | eRPC config: server, memory cache, retries, selection policy, chain aliases |
 | `providers/index.ts` | Collects the providers and upstreams of every source |
 | `providers/alchemy.ts` | One Alchemy provider per key, plus explicit upstreams for unmapped chains |
-| `providers/public.ts` | Keyless public endpoints for chains no keyed provider serves (Etherlink) |
+| `providers/public.ts` | Keyless public endpoints: Etherlink's primary and every chain's fallbacks |
 | `providers/keys.ts` | Validates a keys file |
 | `docker-compose.yml` | Runs the pinned image and mounts the config and keys files |
 | `secrets/alchemy-api-keys.json` | Your keys (private, gitignored) |

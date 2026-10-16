@@ -25,6 +25,23 @@ const networkAliases: Record<number, string> = {
   5000: "mantle",
 };
 
+// Upstream order for each request; retries walk this list. It applies eRPC's default health
+// exclusions, then lists tier:fallback upstreams after all primaries, so a request that fails on
+// every primary is retried on a fallback.
+const selectionEvalFunc = `(upstreams, ctx) => {
+  const healthy = upstreams
+    .removeCordoned()
+    .excludeIf(all(samplesAbove(10), errorRateAbove(0.7)))
+    .excludeIf(all(samplesAbove(10), throttleRateAbove(0.4)))
+    .excludeIf(any(all(samplesAbove(20), latencyAbove(3000), latencyDeviationAbove(3, { mode: 'majority' })), latencyAbove(10_000)))
+    .excludeIf(any(blockNumberLagAbove(16), blockSecondsLagAbove(30)))
+    .whenEmpty(() => upstreams)
+    .probeExcluded({ sampleRate: 0.1, minSamples: 10, minSamplesWindow: '60s', maxConcurrent: 4, timeout: '10s' });
+  const primary = healthy.excludeTag('tier:fallback').sortByScore(PREFER_FASTEST);
+  const fallback = healthy.byTag('tier:fallback').sortByScore(PREFER_FASTEST);
+  return [...primary, ...fallback];
+}`;
+
 const cachePolicy = (finality: string, ttl: string) => ({
   connector: "memory-cache",
   network: "*",
@@ -76,6 +93,7 @@ export default {
       upstreams,
 
       networkDefaults: {
+        selectionPolicy: { evalInterval: "5s", evalFunc: selectionEvalFunc },
         failsafe: [
           {
             matchMethod: "*",
