@@ -1,20 +1,6 @@
-// eRPC config. Alchemy API keys are read from secrets/alchemy-api-keys.json, a JSON array of
-// strings (see secrets/alchemy-api-keys.example.json). The file is inlined when eRPC bundles this
-// config.
+// eRPC config. Upstream sources are defined in providers/.
 // Requests: POST http://localhost:4000/main/evm/<chainId>  or  /main/<alias>
-import alchemyApiKeysFile from "./secrets/alchemy-api-keys.json";
-
-const keysFile: unknown = alchemyApiKeysFile;
-
-if (!Array.isArray(keysFile) || !keysFile.every((key) => typeof key === "string")) {
-  throw new Error("secrets/alchemy-api-keys.json must be a JSON array of strings");
-}
-
-const alchemyApiKeys = keysFile.map((key: string) => key.trim()).filter((key) => key.length > 0);
-
-if (alchemyApiKeys.length === 0) {
-  throw new Error("secrets/alchemy-api-keys.json has no keys");
-}
+import { providers, upstreams } from "./providers";
 
 const networkAliases: Record<number, string> = {
   1: "ethereum",
@@ -37,33 +23,6 @@ const networkAliases: Record<number, string> = {
   4663: "robinhood",
   5042: "arc",
 };
-
-// Chains Alchemy serves that are missing from eRPC's Alchemy chain map, keyed by chain ID with the
-// Alchemy subdomain as value. The providers ignore them and they are added as explicit upstreams.
-const alchemyDirectChains: Record<number, string> = {
-  42793: "etherlink-mainnet",
-  4663: "robinhood-mainnet",
-  5042: "arc-mainnet",
-};
-
-const directNetworkIds = Object.keys(alchemyDirectChains).map((chainId) => `evm:${chainId}`);
-
-// One provider per key. Each provider generates one upstream per Alchemy-supported chain, so every
-// chain gets one upstream per key and eRPC spreads load and fails over between them.
-const alchemyProviders = alchemyApiKeys.map((apiKey, i) => ({
-  id: `alchemy-${i + 1}`,
-  vendor: "alchemy",
-  settings: { apiKey },
-  ignoreNetworks: directNetworkIds,
-}));
-
-const alchemyDirectUpstreams = alchemyApiKeys.flatMap((apiKey, i) =>
-  Object.entries(alchemyDirectChains).map(([chainId, subdomain]) => ({
-    id: `alchemy-${i + 1}-evm:${chainId}`,
-    endpoint: `https://${subdomain}.g.alchemy.com/v2/${apiKey}`,
-    evm: { chainId: Number(chainId) },
-  })),
-);
 
 const cachePolicy = (finality: string, ttl: string) => ({
   connector: "memory-cache",
@@ -112,8 +71,8 @@ export default {
   projects: [
     {
       id: "main",
-      providers: alchemyProviders,
-      upstreams: alchemyDirectUpstreams,
+      providers,
+      upstreams,
 
       networkDefaults: {
         failsafe: [
@@ -130,8 +89,7 @@ export default {
         ],
       },
 
-      // Any other chain in eRPC's Alchemy chain map works at /main/evm/<chainId> without an entry
-      // here.
+      // Any other chain a provider serves works at /main/evm/<chainId> without an entry here.
       networks: Object.entries(networkAliases).map(([chainId, alias]) => ({
         architecture: "evm",
         evm: { chainId: Number(chainId) },

@@ -5,8 +5,9 @@ services:
     command: ["/erpc-server", "--config", "/erpc.ts"]
     volumes:
       - ./erpc.ts:/erpc.ts:ro
+      - ./providers:/providers:ro
     secrets:
-      # Mounted next to /erpc.ts so its relative import resolves.
+      # Mounted at /secrets so the relative imports in /providers resolve.
       - source: alchemy_api_keys
         target: /secrets/alchemy-api-keys.json
     environment:

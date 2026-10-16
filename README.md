@@ -45,19 +45,31 @@ curl -X POST http://localhost:4000/main/ethereum \
   | 80094 | `berachain` | | |
 
 - Any other chain in eRPC's Alchemy chain map: `http://localhost:4000/main/evm/<chainId>`.
-- Etherlink, Robinhood Chain and Arc are missing from eRPC's Alchemy chain map, so `erpc.ts` adds
-  them as explicit Alchemy upstreams (`alchemyDirectChains`). Add a chain there if eRPC answers
-  `network 'evm:<id>' is not supported` for a chain Alchemy serves.
+- Etherlink, Robinhood Chain and Arc are missing from eRPC's Alchemy chain map, so
+  `providers/alchemy.ts` adds them as explicit Alchemy upstreams (`directChains`). Add a chain there
+  if eRPC answers `network 'evm:<id>' is not supported` for a chain Alchemy serves.
 - Prometheus metrics: `http://localhost:4001/metrics`.
 - Logs: `docker compose logs -f erpc`.
 
 Both ports are bound to `127.0.0.1` only.
 
+## Adding a provider
+
+1. Write `providers/<name>.ts` that exports `providers` and `upstreams`, using
+   `providers/alchemy.ts` as the model. Read its keys with `parseApiKeys` from
+   `secrets/<name>-api-keys.json`.
+2. List the module in `sources` in `providers/index.ts`.
+3. Add the keys file as a secret in `docker-compose.yml`, with target `/secrets/<name>-api-keys.json`,
+   and an example file next to it. Allow the example in `.gitignore`.
+
 ## Files
 
 | File | Purpose |
 | --- | --- |
-| `erpc.ts` | eRPC config: one Alchemy provider per key, memory cache, retries, aliases |
-| `docker-compose.yml` | Runs the pinned image and mounts the keys file as a secret |
+| `erpc.ts` | eRPC config: server, memory cache, retries, chain aliases |
+| `providers/index.ts` | Collects the providers and upstreams of every source |
+| `providers/alchemy.ts` | One Alchemy provider per key, plus explicit upstreams for unmapped chains |
+| `providers/keys.ts` | Validates a keys file |
+| `docker-compose.yml` | Runs the pinned image and mounts the config and keys files |
 | `secrets/alchemy-api-keys.json` | Your keys (private, gitignored) |
 | `secrets/alchemy-api-keys.example.json` | Format reference |
