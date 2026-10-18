@@ -108,6 +108,23 @@ export default {
         ],
       },
 
+      // Per-upstream circuit breaker. An open breaker skips its upstream without a network call,
+      // and the request moves on to the next upstream. Rate-limit errors do not count as failures.
+      upstreamDefaults: {
+        failsafe: [
+          {
+            matchMethod: "*",
+            circuitBreaker: {
+              failureThresholdCount: 15,
+              failureThresholdCapacity: 30,
+              halfOpenAfter: "30s",
+              successThresholdCount: 3,
+              successThresholdCapacity: 5,
+            },
+          },
+        ],
+      },
+
       // Any other chain a provider serves works at /main/evm/<chainId> without an entry here.
       networks: Object.entries(networkAliases).map(([chainId, alias]) => ({
         architecture: "evm",
