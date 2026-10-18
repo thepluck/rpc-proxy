@@ -30,12 +30,13 @@ const fallback: Record<number, string[]> = {
   5000: ["https://rpc.mantle.xyz", "https://mantle.drpc.org"],
 };
 
+// skipSyncingCheck: several public RPCs reject eth_syncing, which eRPC calls to detect syncing nodes.
 const toUpstreams = (endpoints: Record<number, string[]>, idPrefix: string, tags: string[]) =>
   Object.entries(endpoints).flatMap(([chainId, urls]) =>
     urls.map((endpoint) => ({
       id: `${idPrefix}-${endpoint.split("/")[2]}-evm:${chainId}`,
       endpoint,
-      evm: { chainId: Number(chainId) },
+      evm: { chainId: Number(chainId), skipSyncingCheck: true },
       tags,
     })),
   );
