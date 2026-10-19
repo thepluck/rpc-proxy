@@ -56,6 +56,8 @@ curl -X POST http://localhost:4000/main/ethereum \
   next policy evaluation (every 5 s), and they are re-admitted once probes succeed. Until the first
   evaluation, about 5 s after startup, requests can go to a fallback. The `X-Erpc-Upstream`
   response header names the upstream that served a request.
+- The fallbacks serve historical (archive) state on every chain except BSC, Arbitrum and Ronin,
+  where they serve recent state only.
 - Prometheus metrics: `http://localhost:4001/metrics`.
 - Logs: `docker compose logs -f erpc`.
 

@@ -5,10 +5,12 @@ const primary: Record<number, string[]> = {
   42793: ["https://node.mainnet.etherlink.com"],
 };
 
-// Tagged tier:fallback. eRPC's default selection policy sends traffic to them only when no other
-// upstream on the chain is healthy. Each chain lists its official RPC first where one exists.
+// Tagged tier:fallback. The selection policy in erpc.ts lists them after the primary upstreams.
+// Endpoints that serve historical (archive) state are listed first. eRPC ranks fallbacks by latency
+// rather than by this order, and moves on to the next fallback when one lacks the requested state.
+// No keyless endpoint tested for BSC, Arbitrum or Ronin serves historical state.
 const fallback: Record<number, string[]> = {
-  1: ["https://ethereum-rpc.publicnode.com", "https://eth.drpc.org"],
+  1: ["https://eth.drpc.org", "https://mainnet.gateway.tenderly.co"],
   56: ["https://bsc-dataseed1.bnbchain.org", "https://bsc-rpc.publicnode.com"],
   42161: ["https://arb1.arbitrum.io/rpc", "https://arbitrum.drpc.org"],
   137: ["https://polygon.drpc.org", "https://polygon.gateway.tenderly.co"],
@@ -23,9 +25,9 @@ const fallback: Record<number, string[]> = {
   999: ["https://rpc.hyperliquid.xyz/evm", "https://hyperliquid.drpc.org"],
   9745: ["https://rpc.plasma.to"],
   42793: ["https://etherlink.drpc.org"],
-  143: ["https://rpc.monad.xyz", "https://monad.drpc.org"],
+  143: ["https://rpc-mainnet.monadinfra.com", "https://rpc.monad.xyz"],
   4326: ["https://mainnet.megaeth.com/rpc", "https://megaeth.drpc.org"],
-  4663: ["https://rpc.mainnet.chain.robinhood.com", "https://robinhood-rpc.publicnode.com"],
+  4663: ["https://robinhood.drpc.org", "https://rpc.mainnet.chain.robinhood.com"],
   5042: ["https://rpc.mainnet.arc.io", "https://arc.drpc.org"],
   5000: ["https://rpc.mantle.xyz", "https://mantle.drpc.org"],
 };
