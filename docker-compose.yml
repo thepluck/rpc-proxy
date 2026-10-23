@@ -10,6 +10,8 @@ services:
       # Mounted at /secrets so the relative imports in /providers resolve.
       - source: alchemy_api_keys
         target: /secrets/alchemy-api-keys.json
+      - source: drpc_api_keys
+        target: /secrets/drpc-api-keys.json
     environment:
       LOG_WRITER: console
       GOMEMLIMIT: 1800MiB
@@ -21,3 +23,5 @@ services:
 secrets:
   alchemy_api_keys:
     file: ./secrets/alchemy-api-keys.json
+  drpc_api_keys:
+    file: ./secrets/drpc-api-keys.json

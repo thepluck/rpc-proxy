@@ -1,2 +1,3 @@
 secrets/*
 !secrets/alchemy-api-keys.example.json
+!secrets/drpc-api-keys.example.json
